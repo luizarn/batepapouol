@@ -1,32 +1,39 @@
+let nome = prompt('Qual é o seu lindo nome?');
+let usuario;
+let lastMessage;
+let penultimateMessage;
 
 listaMensagens = [];
-let usuario;
+pegarMensagens();
+inicioBatepapo();
+
 
 function inicioBatepapo(){
-    const nome = prompt('Qual é o seu lindo nome?')
     usuario = {
         name: nome
     };
     
     const promesse = axios.post("https://mock-api.driven.com.br/api/v6/uol/participants", usuario);
-    promesse.then(deuCerto)
-    promesse.catch(deuErrado)
+    promesse.then(setInterval(deuCerto, 5000));
+    promesse.catch(deuErrado);
 }
-inicioBatepapo()
-setInterval(() => {axios.post('https://mock-api.driven.com.br/api/v6/uol/status', usuario);   
-}, 1000);
+
 
 function deuCerto(){
-    pegarMensagens();
+    //pegarMensagens();
     console.log("seu nome está com o status ativo!")
+    axios.post('https://mock-api.driven.com.br/api/v6/uol/status', usuario);  
 }
 
-function deuErrado(){
-    alert('Esse usuário já está em uso :( Tente novamente')
+function deuErrado(erro){
+    if ( erro.response.status === 400){
+    alert('Esse usuário já está em uso :( Tente novamente');
     const nome = prompt('Qual é o seu lindo nome?')
+    inicioBatepapo();
+} else{
+    alert("Ocorreu un erro!");
 }
-
-setInterval(pegarMensagens, 3000);
+}
 
 //Ao entrar no site, este deve carregar as mensagens do servidor e exibi-las conforme layout fornecido
 
@@ -37,16 +44,13 @@ const promessa = axios.get("https://mock-api.driven.com.br/api/v6/uol/messages")
 promessa.then(respostaChegou);
 }
 
-pegarMensagens()
-
-
+setInterval(pegarMensagens, 3000); //atualizar as mensagens a cada 3 segundos
 
 function respostaChegou(resposta){
     console.log("it's all good")
    
     //adicionar o que veio do servidor para a array vazia
     listaMensagens = resposta.data;
-    console.log(listaMensagens)
 
     //adicionar na tela do app as mensagens do servidor
     renderizarMensagens();
@@ -70,31 +74,59 @@ for(let i = 0; i < listaMensagens.length; i++){
     <p> <span class="letracinza">(${message.time})</span> <span class="negrito">${message.from}</span>  ${message.text} </p>
      </li>
      `
-    } else if(message.type === 'private_message'){
+    }else if(message.type === 'message'){
+        quadroPrincipal.innerHTML += 
+        `<li class = "mensagem fundobranco">
+        <p> <span class="letracinza">(${message.time})</span> <span class="negrito">${message.from}</span> para <span class="negrito">${message.to}</span>: ${message.text} </p>
+        </li>`
+    } else if(message.type === 'private_message' && (message.from === nome || message.to === nome)){
         quadroPrincipal.innerHTML += 
     `<li class = "mensagem fundorosa">
     <p> <span class="letracinza">(${message.time})</span> <span class="negrito">${message.from}</span> reservadamente para <span class="negrito">${message.to}</span>: ${message.text} </p>
     </li>
     `
-    } else{
-        quadroPrincipal.innerHTML += 
-        `<li class = "mensagem fundobranco">
-        <p> <span class="letracinza">(${message.time})</span> <span class="negrito">${message.from}</span> para <span class="negrito">${message.to}</span>: ${message.text} </p>
-        </li>`
+    }else{
+        quadroPrincipal.innerHTML += "";
     }
 }
-let lastMessage = quadroPrincipal.querySelectorAll(".mensagem");
-lastMessage[(lastMessage.length)-1].scrollIntoView();
+
+//fazer com que a última mensagem que foi adicionada fique sempre aparente
+penultimateMessage = lastMessage;
+let comparador = quadroPrincipal.querySelectorAll(".mensagem");
+lastMessage = comparador[(comparador.length)-1];
+if (lastMessage.innerHTML !== penultimateMessage.innerHTML){
+    lastMessage.scrollIntoView();
+}
 }
 renderizarMensagens();
 
 
-//function addMensagem(){
 
-//function attMensages(){
 
-   // lastme
-   // const lastmessage = document.querySelector(".mensagem");
-  // lastmessage.scrollIntoView();
-//}
+function addMensagem(){
+const msg = document.querySelector('.campo-texto').value;
 
+let novamsg = {
+    from: nome,
+    to: "Todos",
+    text: msg,
+    type: "message"
+};
+console.log(novamsg)
+
+const promisse = axios.post("https://mock-api.driven.com.br/api/v6/uol/messages", novamsg);
+
+promisse.then(pegarMensagens)
+promisse.catch(msgnaoChegou)
+
+limparTexto();
+
+}
+
+function msgnaoChegou(){
+    window.location.reload()
+}
+
+function limparTexto(){
+    document.querySelector('.campo-texto').value ="";
+}
