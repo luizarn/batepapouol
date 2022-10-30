@@ -1,6 +1,30 @@
 
 listaMensagens = [];
-let lastMessage;
+let usuario;
+
+function inicioBatepapo(){
+    const nome = prompt('Qual é o seu lindo nome?')
+    usuario = {
+        name: nome
+    };
+    
+    const promesse = axios.post("https://mock-api.driven.com.br/api/v6/uol/participants", usuario);
+    promesse.then(deuCerto)
+    promesse.catch(deuErrado)
+}
+inicioBatepapo()
+setInterval(() => {axios.post('https://mock-api.driven.com.br/api/v6/uol/status', usuario);   
+}, 1000);
+
+function deuCerto(){
+    pegarMensagens();
+    console.log("seu nome está com o status ativo!")
+}
+
+function deuErrado(){
+    alert('Esse usuário já está em uso :( Tente novamente')
+    const nome = prompt('Qual é o seu lindo nome?')
+}
 
 setInterval(pegarMensagens, 3000);
 
