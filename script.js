@@ -70,18 +70,18 @@ for(let i = 0; i < listaMensagens.length; i++){
 
     if(message.type === 'status'){
         quadroPrincipal.innerHTML += 
-    `<li class = "mensagem fundocinza">
+    `<li class = "mensagem fundocinza" data-test="message">
     <p> <span class="letracinza">(${message.time})</span> <span class="negrito">${message.from}</span>  ${message.text} </p>
      </li>
      `
     }else if(message.type === 'message'){
         quadroPrincipal.innerHTML += 
-        `<li class = "mensagem fundobranco">
+        `<li class = "mensagem fundobranco" data-test="message">
         <p> <span class="letracinza">(${message.time})</span> <span class="negrito">${message.from}</span> para <span class="negrito">${message.to}</span>: ${message.text} </p>
         </li>`
     } else if(message.type === 'private_message' && (message.from === nome || message.to === nome)){
         quadroPrincipal.innerHTML += 
-    `<li class = "mensagem fundorosa">
+    `<li class = "mensagem fundorosa" data-test="message">
     <p> <span class="letracinza">(${message.time})</span> <span class="negrito">${message.from}</span> reservadamente para <span class="negrito">${message.to}</span>: ${message.text} </p>
     </li>
     `
